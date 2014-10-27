@@ -14,6 +14,7 @@ set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib${NUMBITS}" CACHE PATH "Installa
 set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include/zlib" CACHE PATH "Installation directory for headers")
 set(INSTALL_MAN_DIR "${CMAKE_INSTALL_PREFIX}/share/man" CACHE PATH "Installation directory for manual pages")
 set(INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_PREFIX}/share/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files")
+set(INSTALL_CMAKECONFIG_DIR "${CMAKE_INSTALL_PREFIX}/share/cmake" CACHE PATH "Installation directory for *-config.cmake files")
 
 include(CheckTypeSize)
 include(CheckFunctionExists)
@@ -212,10 +213,12 @@ elseif(BUILD_SHARED_LIBS AND WIN32)
 endif()
 
 if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
-    install(TARGETS zlib zlibstatic
+    install(TARGETS zlib zlibstatic EXPORT ${PROJECT_NAME}-targets
         RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
         ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
+    install(EXPORT ${PROJECT_NAME}-targets DESTINATION "${INSTALL_LIB_DIR}/cmake")
+    install(FILES ${PROJECT_NAME}-config.cmake DESTINATION "${INSTALL_CMAKECONFIG_DIR}")
 endif()
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
     install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}")

@@ -4,10 +4,11 @@
 set(prj zlib)
 # this file (-config) installed to share/cmake by default (see top-level CMakeLists.txt)
 get_filename_component(SELF_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+get_filename_component(XP_ROOTDIR "${SELF_DIR}/../../" ABSOLUTE)
 # targets file (-targets) installed to lib${NUMBITS}/cmake
-include(${SELF_DIR}/../../lib${NUMBITS}/cmake/${prj}-targets.cmake)
+include(${XP_ROOTDIR}/lib${NUMBITS}/cmake/${prj}-targets.cmake)
 string(TOUPPER ${prj} PRJ)
-get_filename_component(${PRJ}_INCLUDE_DIR "${SELF_DIR}/../../include" ABSOLUTE)
+find_path(${PRJ}_INCLUDE_DIR zlib.h PATHS ${XP_ROOTDIR}/include/${prj} NO_DEFAULT_PATH)
 set(${PRJ}_LIBRARIES zlib)
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(${prj}

@@ -9,7 +9,7 @@ get_filename_component(XP_ROOTDIR "${SELF_DIR}/../../" ABSOLUTE)
 include(${XP_ROOTDIR}/lib${NUMBITS}/cmake/${prj}-targets.cmake)
 string(TOUPPER ${prj} PRJ)
 find_path(${PRJ}_INCLUDE_DIR zlib.h PATHS ${XP_ROOTDIR}/include/${prj} NO_DEFAULT_PATH)
-set(${PRJ}_LIBRARIES zlib)
+set(${PRJ}_LIBRARIES zlibstatic)
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(${prj}
   REQUIRED_VARS

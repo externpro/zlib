@@ -54,7 +54,9 @@ endif()
 #
 check_include_file(unistd.h Z_HAVE_UNISTD_H)
 
-set(CMAKE_DEBUG_POSTFIX "d")
+if(NOT DEFINED CMAKE_DEBUG_POSTFIX)
+  set(CMAKE_DEBUG_POSTFIX "d")
+endif()
 if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
     add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)

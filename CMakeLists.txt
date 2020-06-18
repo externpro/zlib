@@ -166,7 +166,7 @@ string(REGEX REPLACE ".*#define[ \t]+ZLIB_VERSION[ \t]+\"([-0-9A-Za-z.]+)\".*"
 
 if(NOT DEFINED ZLIB_VER)
   set(ZLIB_VER ${ZLIB_FULL_VERSION})
-elseif(NOT ${ZLIB_VER} STREQUAL ${ZLIB_FULL_VERSION})
+elseif(NOT ZLIB_VER STREQUAL ZLIB_FULL_VERSION)
   message(AUTHOR_WARNING "version passed in (${ZLIB_VER}) doesn't match version from zlib.h (${ZLIB_FULL_VERSION})")
 endif()
 set(ver _${ZLIB_VER})
@@ -204,17 +204,22 @@ if(NOT CYGWIN)
     set_target_properties(zlib PROPERTIES VERSION ${ZLIB_FULL_VERSION})
 endif()
 
+target_include_directories(zlibstatic PUBLIC
+  $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include${verDir}> #include <zlib/zlib.h>
+  $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include${verDir}/${PROJECT_NAME}> #include <zlib.h>
+  )
+
 if(UNIX)
     # On unix-like platforms the library is almost always called libz
    set_target_properties(zlib zlibstatic PROPERTIES OUTPUT_NAME z${ver})
-   if(NOT APPLE AND NOT ${CMAKE_SYSTEM_NAME} STREQUAL SunOS)
+   if(NOT APPLE)
      set_target_properties(zlib PROPERTIES LINK_FLAGS "-Wl,--version-script,\"${CMAKE_CURRENT_SOURCE_DIR}/zlib.map\"")
    endif()
 elseif(BUILD_SHARED_LIBS AND WIN32)
     # Creates zlib1.dll when building shared library version
     set_target_properties(zlib PROPERTIES SUFFIX "1.dll")
 elseif(WIN32)
-   set_target_properties(zlibstatic PROPERTIES OUTPUT_NAME zlibstatic${ver})
+   set_target_properties(zlibstatic PROPERTIES OUTPUT_NAME libz${ver})
 endif()
 
 if(NOT SKIP_INSTALL_SHARED_LIBRARIES AND NOT SKIP_INSTALL_ALL)
@@ -229,7 +234,10 @@ if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
         RUNTIME DESTINATION bin
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib )
-    install(EXPORT ${targetsFile} DESTINATION lib/cmake)
+    if(DEFINED XP_NAMESPACE)
+      set(nameSpace NAMESPACE ${XP_NAMESPACE}::)
+    endif()
+    install(EXPORT ${targetsFile} DESTINATION lib/cmake ${nameSpace})
 endif()
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
     install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION include${verDir}/${PROJECT_NAME})

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.4.4)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 
 project(zlib C)
+include(GNUInstallDirs)
 include(flags OPTIONAL)
 
 set(VERSION "1.2.8")
@@ -164,14 +165,6 @@ file(READ ${CMAKE_CURRENT_SOURCE_DIR}/zlib.h _zlib_h_contents)
 string(REGEX REPLACE ".*#define[ \t]+ZLIB_VERSION[ \t]+\"([-0-9A-Za-z.]+)\".*"
     "\\1" ZLIB_FULL_VERSION ${_zlib_h_contents})
 
-if(NOT DEFINED ZLIB_VER)
-  set(ZLIB_VER ${ZLIB_FULL_VERSION})
-elseif(NOT ZLIB_VER STREQUAL ZLIB_FULL_VERSION)
-  message(AUTHOR_WARNING "version passed in (${ZLIB_VER}) doesn't match version from zlib.h (${ZLIB_FULL_VERSION})")
-endif()
-set(ver _${ZLIB_VER})
-set(verDir /${PROJECT_NAME}${ver})
-
 if(MINGW)
     # This gets us DLL resource information when compiling on MinGW.
     if(NOT CMAKE_RC_COMPILER)
@@ -205,13 +198,13 @@ if(NOT CYGWIN)
 endif()
 
 target_include_directories(zlibstatic PUBLIC
-  $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include${verDir}> #include <zlib/zlib.h>
-  $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include${verDir}/${PROJECT_NAME}> #include <zlib.h>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> #include <zlib/zlib.h>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}> #include <zlib.h>
   )
 
 if(UNIX)
     # On unix-like platforms the library is almost always called libz
-   set_target_properties(zlib zlibstatic PROPERTIES OUTPUT_NAME z${ver})
+   set_target_properties(zlib zlibstatic PROPERTIES OUTPUT_NAME z)
    if(NOT APPLE)
      set_target_properties(zlib PROPERTIES LINK_FLAGS "-Wl,--version-script,\"${CMAKE_CURRENT_SOURCE_DIR}/zlib.map\"")
    endif()
@@ -219,34 +212,34 @@ elseif(BUILD_SHARED_LIBS AND WIN32)
     # Creates zlib1.dll when building shared library version
     set_target_properties(zlib PROPERTIES SUFFIX "1.dll")
 elseif(WIN32)
-   set_target_properties(zlibstatic PROPERTIES OUTPUT_NAME libz${ver})
+   set_target_properties(zlibstatic PROPERTIES OUTPUT_NAME libz)
 endif()
 
 if(NOT SKIP_INSTALL_SHARED_LIBRARIES AND NOT SKIP_INSTALL_ALL)
     install(TARGETS zlib
-        RUNTIME DESTINATION bin
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib )
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
 endif()
 if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
-    set(targetsFile ${PROJECT_NAME}${ver}-targets)
+    set(targetsFile ${PROJECT_NAME}-targets)
     install(TARGETS zlibstatic EXPORT ${targetsFile}
-        RUNTIME DESTINATION bin
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib )
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
     if(DEFINED XP_NAMESPACE)
       set(nameSpace NAMESPACE ${XP_NAMESPACE}::)
     endif()
-    install(EXPORT ${targetsFile} DESTINATION lib/cmake ${nameSpace})
+    install(EXPORT ${targetsFile} DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake ${nameSpace})
 endif()
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
-    install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION include${verDir}/${PROJECT_NAME})
+    install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
 endif()
 if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
-    install(FILES zlib.3 DESTINATION share/man/man3)
+    install(FILES zlib.3 DESTINATION ${CMAKE_INSTALL_DATADIR}/man/man3)
 endif()
 if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
-    install(FILES ${ZLIB_PC} DESTINATION share/pkgconfig)
+    install(FILES ${ZLIB_PC} DESTINATION ${CMAKE_INSTALL_DATADIR}/pkgconfig)
 endif()
 
 #============================================================================

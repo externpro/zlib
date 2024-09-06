@@ -1,11 +1,13 @@
-cmake_minimum_required(VERSION 2.4.4...3.21)
+cmake_minimum_required(VERSION 2.4.4...3.28)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
+include(preproject)
 
-project(zlib C)
+project(zlib LANGUAGES C VERSION 1.2.8)
 include(GNUInstallDirs)
-include(flags OPTIONAL)
+include(flags)
 
-set(VERSION "1.2.8")
+set(VERSION "${CMAKE_PROJECT_VERSION}")
 
 option(ASM686 "Enable building i686 assembly implementation")
 option(AMD64 "Enable building amd64 assembly implementation")
@@ -223,16 +225,17 @@ if(NOT SKIP_INSTALL_SHARED_LIBRARIES AND NOT SKIP_INSTALL_ALL)
 endif()
 if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
     set(targetsFile ${PROJECT_NAME}-targets)
-    install(TARGETS zlibstatic EXPORT ${targetsFile}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
     if(DEFINED XP_NAMESPACE)
       set(nameSpace NAMESPACE ${XP_NAMESPACE}::)
     endif()
     if(NOT DEFINED XP_INSTALL_CMAKEDIR)
       set(XP_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
     endif()
+    xpPackageDevel(TARGETS_FILE ${targetsFile} LIBRARIES ${nameSpace}zlibstatic)
+    install(TARGETS zlibstatic EXPORT ${targetsFile}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
     install(EXPORT ${targetsFile} DESTINATION ${XP_INSTALL_CMAKEDIR} ${nameSpace})
 endif()
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )

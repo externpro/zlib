@@ -3,7 +3,7 @@ set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
 include(preproject)
 
-project(zlib LANGUAGES C VERSION 1.2.8.1)
+project(zlib LANGUAGES C VERSION 1.2.8.2)
 include(GNUInstallDirs)
 include(flags)
 

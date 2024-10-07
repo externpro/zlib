@@ -226,12 +226,13 @@ endif()
 if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
     set(targetsFile ${PROJECT_NAME}-targets)
     if(DEFINED XP_NAMESPACE)
-      set(nameSpace NAMESPACE ${XP_NAMESPACE}::)
+      set(XP_NAMESPACE ${XP_NAMESPACE}::)
+      set(nameSpace NAMESPACE ${XP_NAMESPACE})
     endif()
     if(NOT DEFINED XP_INSTALL_CMAKEDIR)
       set(XP_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
     endif()
-    xpPackageDevel(TARGETS_FILE ${targetsFile} LIBRARIES ${nameSpace}zlibstatic)
+    xpPackageDevel(TARGETS_FILE ${targetsFile} LIBRARIES ${XP_NAMESPACE}zlibstatic)
     install(TARGETS zlibstatic EXPORT ${targetsFile}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}

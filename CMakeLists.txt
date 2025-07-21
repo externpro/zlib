@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.4.4...3.28)
+cmake_minimum_required(VERSION 2.4.4...3.31)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
 include(preproject)

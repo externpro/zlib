@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.4.4...3.31)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
-include(preproject)
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES xproinc)
 
 project(zlib LANGUAGES C VERSION 1.2.8.3)
 include(GNUInstallDirs)

@@ -3,14 +3,20 @@ set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
 set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES xproinc)
 
-project(zlib LANGUAGES C VERSION 1.2.8.3)
+project(zlib C)
 include(GNUInstallDirs)
 include(flags)
 
-set(VERSION "${CMAKE_PROJECT_VERSION}")
+set(VERSION "1.2.8")
 
 option(ASM686 "Enable building i686 assembly implementation")
 option(AMD64 "Enable building amd64 assembly implementation")
+
+set(INSTALL_BIN_DIR "${CMAKE_INSTALL_BINDIR}" CACHE PATH "Installation directory for executables")
+set(INSTALL_LIB_DIR "${CMAKE_INSTALL_LIBDIR}" CACHE PATH "Installation directory for libraries")
+set(INSTALL_INC_DIR "${CMAKE_INSTALL_INCLUDEDIR}" CACHE PATH "Installation directory for headers")
+set(INSTALL_MAN_DIR "${CMAKE_INSTALL_DATADIR}/man" CACHE PATH "Installation directory for manual pages")
+set(INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_DATADIR}/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files")
 
 include(CheckTypeSize)
 include(CheckFunctionExists)
@@ -200,8 +206,8 @@ if(NOT CYGWIN)
 endif()
 
 target_include_directories(zlibstatic PUBLIC
-  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> #include <zlib/zlib.h>
-  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}> #include <zlib.h>
+  $<INSTALL_INTERFACE:${INSTALL_INC_DIR}> #include <zlib/zlib.h>
+  $<INSTALL_INTERFACE:${INSTALL_INC_DIR}/${PROJECT_NAME}> #include <zlib.h>
   )
 
 if(UNIX)
@@ -219,9 +225,9 @@ endif()
 
 if(NOT SKIP_INSTALL_SHARED_LIBRARIES AND NOT SKIP_INSTALL_ALL)
     install(TARGETS zlib
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
+        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
+        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+        LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
 endif()
 if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
     set(targetsFile ${PROJECT_NAME}-targets)
@@ -234,19 +240,19 @@ if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
     endif()
     xpPackageDevel(TARGETS_FILE ${targetsFile} LIBRARIES ${XP_NAMESPACE}zlibstatic)
     install(TARGETS zlibstatic EXPORT ${targetsFile}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
+        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
+        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+        LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
     install(EXPORT ${targetsFile} DESTINATION ${XP_INSTALL_CMAKEDIR} ${nameSpace})
 endif()
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
-    install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
+    install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}/${PROJECT_NAME}")
 endif()
 if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
-    install(FILES zlib.3 DESTINATION ${CMAKE_INSTALL_DATADIR}/man/man3)
+    install(FILES zlib.3 DESTINATION "${INSTALL_MAN_DIR}/man3")
 endif()
 if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
-    install(FILES ${ZLIB_PC} DESTINATION ${CMAKE_INSTALL_DATADIR}/pkgconfig)
+    install(FILES ${ZLIB_PC} DESTINATION "${INSTALL_PKGCONFIG_DIR}")
 endif()
 
 #============================================================================

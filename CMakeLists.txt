@@ -1,11 +1,8 @@
 cmake_minimum_required(VERSION 2.4.4...3.31)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.devcontainer/cmake)
-set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES xproinc)
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES .devcontainer/cmake/xproinc.cmake)
 
 project(zlib C)
-include(GNUInstallDirs)
-include(xpflags)
 
 set(VERSION "1.3.1")
 
@@ -198,19 +195,25 @@ if(NOT SKIP_INSTALL_SHARED_LIBRARIES AND NOT SKIP_INSTALL_ALL)
 endif()
 if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
     set(targetsFile ${PROJECT_NAME}-targets)
-    if(DEFINED XP_NAMESPACE)
-        set(XP_NAMESPACE ${XP_NAMESPACE}::)
-        set(nameSpace NAMESPACE ${XP_NAMESPACE})
-    endif()
-    if(NOT DEFINED XP_INSTALL_CMAKEDIR)
-        set(XP_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
-    endif()
-    xpPackageDevel(TARGETS_FILE ${targetsFile} LIBRARIES ${XP_NAMESPACE}zlibstatic)
     install(TARGETS zlibstatic EXPORT ${targetsFile}
         RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
         ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
-    install(EXPORT ${targetsFile} DESTINATION ${XP_INSTALL_CMAKEDIR} ${nameSpace})
+    if(DEFINED XP_NAMESPACE)
+        string(JOIN "\n" ALIASES
+          "if(NOT TARGET ZLIB::ZLIB)"
+          "  add_library(ZLIB::ZLIB ALIAS ${XP_NAMESPACE}::zlibstatic)"
+          "endif()"
+          ""
+          )
+        xpExternPackage(NAMESPACE ${XP_NAMESPACE}
+          TARGETS_FILE ${targetsFile} LIBRARIES zlibstatic
+          BASE v${ZLIB_FULL_VERSION} XPDIFF "patch" DESC "compression library"
+          WEB "https://zlib.net 'zlib website'" UPSTREAM "github.com/madler/zlib"
+          LICENSE "[permissive](https://zlib.net/zlib_license.html 'zlib/libpng license, see https://en.wikipedia.org/wiki/Zlib_License')"
+          )
+        install(EXPORT ${targetsFile} DESTINATION ${XP_INSTALL_CMAKEDIR} NAMESPACE ${XP_NAMESPACE}::)
+    endif()
 endif()
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
     install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}/${PROJECT_NAME}")

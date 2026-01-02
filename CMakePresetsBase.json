@@ -11,5 +11,11 @@
         "SKIP_INSTALL_FILES": "ON"
       }
     }
+  ],
+  "buildPresets": [
+    {
+      "name": "build-base",
+      "hidden": true
+    }
   ]
 }

@@ -210,7 +210,7 @@ if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
           TARGETS_FILE ${targetsFile} LIBRARIES zlibstatic
           BASE v${ZLIB_FULL_VERSION} XPDIFF "patch" DESC "compression library"
           WEB "https://zlib.net 'zlib website'" UPSTREAM "github.com/madler/zlib"
-          LICENSE "[permissive](https://zlib.net/zlib_license.html 'zlib/libpng license, see https://en.wikipedia.org/wiki/Zlib_License')"
+          LICENSE "[Zlib](https://zlib.net/zlib_license.html 'zlib/libpng license, see https://en.wikipedia.org/wiki/Zlib_License')"
           )
         install(EXPORT ${targetsFile} DESTINATION ${CMAKE_INSTALL_CMAKEDIR} NAMESPACE ${XP_NAMESPACE}::)
     endif()

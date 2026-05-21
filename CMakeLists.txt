@@ -1,6 +1,5 @@
-cmake_minimum_required(VERSION 2.4.4...3.31)
+cmake_minimum_required(VERSION 2.4.4...4.3)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
-set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES .devcontainer/cmake/xproinc.cmake)
 
 project(zlib C)
 
@@ -199,20 +198,21 @@ if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
         RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
         ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
-    if(DEFINED XP_NAMESPACE)
+    if(COMMAND xpExternPackage)
         string(JOIN "\n" ALIASES
           "if(NOT TARGET ZLIB::ZLIB)"
-          "  add_library(ZLIB::ZLIB ALIAS ${XP_NAMESPACE}::zlibstatic)"
+          "  add_library(ZLIB::ZLIB ALIAS ${PROJECT_NAME}::zlibstatic)"
           "endif()"
           ""
           )
-        xpExternPackage(NAMESPACE ${XP_NAMESPACE}
-          TARGETS_FILE ${targetsFile} LIBRARIES zlibstatic
+        xpExternPackage(TARGETS_FILE ${targetsFile}
+          LIBRARIES zlibstatic DEFAULT_TARGETS zlibstatic
+          CREATE_ALIASES PKG_CMAKE_USEXT
           BASE v${ZLIB_FULL_VERSION} XPDIFF "patch" DESC "compression library"
           WEB "https://zlib.net 'zlib website'" UPSTREAM "github.com/madler/zlib"
           LICENSE "[Zlib](https://zlib.net/zlib_license.html 'zlib/libpng license, see https://en.wikipedia.org/wiki/Zlib_License')"
           )
-        install(EXPORT ${targetsFile} DESTINATION ${CMAKE_INSTALL_CMAKEDIR} NAMESPACE ${XP_NAMESPACE}::)
+        install(EXPORT ${targetsFile} DESTINATION ${CMAKE_INSTALL_CMAKEDIR} NAMESPACE ${PROJECT_NAME}::)
     endif()
 endif()
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )

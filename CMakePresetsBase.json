@@ -6,8 +6,8 @@
       "hidden": true,
       "binaryDir": "${sourceDir}/_bld-${presetName}",
       "cacheVariables": {
-        "SKIP_INSTALL_SHARED_LIBRARIES": "ON",
-        "SKIP_INSTALL_FILES": "ON",
+        "ZLIB_BUILD_SHARED": "OFF",
+        "ZLIB_BUILD_TESTING": "OFF",
         "CMAKE_EXPERIMENTAL_GENERATE_SBOM": "ca494ed3-b261-4205-a01f-603c95e4cae0"
       }
     }

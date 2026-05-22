@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12...3.31)
+cmake_minimum_required(VERSION 3.12...4.3)
 
 project(
     zlib
@@ -39,10 +39,12 @@ include(CheckFunctionExists)
 include(CheckIncludeFile)
 include(CMakePackageConfigHelpers)
 include(CheckTypeSize)
-include(CPack)
 include(GNUInstallDirs)
 
+if(NOT COMMAND xpExternPackage)
+include(CPack)
 set(CPACK_INCLUDED TRUE)
+endif()
 
 if(NOT ZLIB_CONF_WRITTEN)
     set(Z_PREFIX ${ZLIB_PREFIX})
@@ -208,7 +210,15 @@ if(ZLIB_BUILD_STATIC)
         zlibstatic
         PUBLIC $<BUILD_INTERFACE:${zlib_BINARY_DIR}>
                $<BUILD_INTERFACE:${zlib_SOURCE_DIR}>
-               $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+               $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}> # include <zlib.h>
+               $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>) # include <zlib/zlib.h>
+    if(COMMAND xpExternPackage AND HAVE_OFF64_T)
+      set(publicDef PUBLIC _LARGEFILE64_SOURCE=1)
+    elseif(COMMAND xpExternPackage)
+      set(publicDef)
+    else()
+      set(publicDef PUBLIC $<$<BOOL:${HAVE_OFF64_T}>:_LARGEFILE64_SOURCE=1>)
+    endif()
     target_compile_definitions(
         zlibstatic
         PRIVATE ZLIB_BUILD
@@ -216,9 +226,12 @@ if(ZLIB_BUILD_STATIC)
                 $<$<BOOL:${HAVE___ATTR__VIS_HIDDEN}>:HAVE_HIDDEN>
                 $<$<BOOL:${MSVC}>:_CRT_SECURE_NO_DEPRECATE>
                 $<$<BOOL:${MSVC}>:_CRT_NONSTDC_NO_DEPRECATE>
-        PUBLIC $<$<BOOL:${HAVE_OFF64_T}>:_LARGEFILE64_SOURCE=1>)
+        ${publicDef})
+    if(NOT COMMAND xpExternPackage)
+      set(exportName EXPORT_NAME ZLIBSTATIC)
+    endif()
     set_target_properties(
-        zlibstatic PROPERTIES EXPORT_NAME ZLIBSTATIC OUTPUT_NAME
+        zlibstatic PROPERTIES ${exportName} OUTPUT_NAME
                                                      z${zlib_static_suffix})
 endif(ZLIB_BUILD_STATIC)
 
@@ -255,11 +268,32 @@ if(ZLIB_INSTALL)
             RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
             ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
             LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+        if(COMMAND xpExternPackage)
+            string(JOIN "\n" ALIASES
+              "if(NOT TARGET ZLIB::ZLIB)"
+              "  add_library(ZLIB::ZLIB ALIAS ${PROJECT_NAME}::zlibstatic)"
+              "endif()"
+              ""
+              )
+            xpExternPackage(EXPORT zlibStaticExport TARGETS_FILE ZLIB-static
+              LIBRARIES zlibstatic DEFAULT_TARGETS zlibstatic
+              CREATE_ALIASES PKG_CMAKE_USEXT
+              BASE v${PROJECT_VERSION} XPDIFF "patch" DESC "${PROJECT_DESCRIPTION}"
+              WEB "${PROJECT_HOMEPAGE_URL} 'zlib website'" UPSTREAM "github.com/madler/zlib"
+              LICENSE "[Zlib](https://zlib.net/zlib_license.html 'zlib/libpng license, see https://en.wikipedia.org/wiki/Zlib_License')"
+              )
+            set(CMAKE_NAMESPACE ${PROJECT_NAME})
+            set(CMAKE_OPT_INSTALL FALSE)
+        elseif(NOT DEFINED CMAKE_INSTALL_CMAKEDIR)
+            set(CMAKE_INSTALL_CMAKEDIR ${CMAKE_INSTALL_LIBDIR}/cmake/zlib)
+            set(CMAKE_NAMESPACE ZLIB)
+            set(CMAKE_OPT_INSTALL TRUE)
+        endif()
         install(
             EXPORT zlibStaticExport
             FILE ZLIB-static.cmake
-            NAMESPACE ZLIB::
-            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/zlib)
+            NAMESPACE ${CMAKE_NAMESPACE}::
+            DESTINATION ${CMAKE_INSTALL_CMAKEDIR})
     endif(ZLIB_BUILD_STATIC)
 
     configure_package_config_file(
@@ -272,13 +306,15 @@ if(ZLIB_INSTALL)
         VERSION "${zlib_VERSION}"
         COMPATIBILITY AnyNewerVersion)
 
+    if(CMAKE_OPT_INSTALL)
     install(FILES ${zlib_BINARY_DIR}/ZLIBConfig.cmake
                   ${zlib_BINARY_DIR}/ZLIBConfigVersion.cmake
             DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/zlib)
+    endif() # CMAKE_OPT_INSTALL
     install(
         FILES ${ZLIB_PUBLIC_HDRS}
         COMPONENT Development
-        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}")
     install(
         FILES zlib.3
         COMPONENT Docs
@@ -293,10 +329,12 @@ if(ZLIB_INSTALL)
               doc/txtvsbin.txt
         COMPONENT Docs
         DESTINATION "${CMAKE_INSTALL_DOCDIR}/zlib")
+    if(CMAKE_OPT_INSTALL)
     install(
         FILES ${ZLIB_PC}
         COMPONENT Development
         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+    endif() # CMAKE_OPT_INSTALL
 endif(ZLIB_INSTALL)
 
 # ============================================================================

@@ -277,7 +277,6 @@ if(ZLIB_INSTALL)
               )
             xpExternPackage(EXPORT zlibStaticExport TARGETS_FILE ZLIB-static
               LIBRARIES zlibstatic DEFAULT_TARGETS zlibstatic
-              CREATE_ALIASES PKG_CMAKE_USEXT
               BASE v${PROJECT_VERSION} XPDIFF "patch" DESC "${PROJECT_DESCRIPTION}"
               WEB "${PROJECT_HOMEPAGE_URL} 'zlib website'" UPSTREAM "github.com/madler/zlib"
               LICENSE "[Zlib](https://zlib.net/zlib_license.html 'zlib/libpng license, see https://en.wikipedia.org/wiki/Zlib_License')"
